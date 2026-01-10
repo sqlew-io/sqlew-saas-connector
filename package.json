@@ -1,0 +1,24 @@
+{
+  "name": "@sqlew/saas-connector",
+  "version": "1.0.1",
+  "description": "SaaS connector plugin for mcp-sqlew",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:dev": "node scripts/build.mjs --env=development",
+    "build:prod": "node scripts/build.mjs --env=production",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "esbuild": "^0.24.2",
+    "@types/node": "^18.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

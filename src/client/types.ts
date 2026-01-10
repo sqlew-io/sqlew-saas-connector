@@ -12,7 +12,7 @@ export interface HealthCheckResult {
 }
 
 // Backend type
-export type BackendType = 'local' | 'plugin';
+export type BackendType = 'local' | 'saas';
 
 // ToolBackend interface (compatible with mcp-sqlew)
 export interface ToolBackend {

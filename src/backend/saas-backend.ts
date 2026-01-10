@@ -9,7 +9,7 @@ import type {
 } from '../client/types';
 
 export class SaaSBackend implements ToolBackend {
-  readonly backendType = 'plugin' as const;
+  readonly backendType = 'saas' as const;
   readonly pluginName = 'saas-connector';
 
   private httpClient: HttpClient;

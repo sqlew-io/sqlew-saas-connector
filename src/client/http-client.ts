@@ -7,18 +7,27 @@ import {
   MAX_RETRY_DELAY,
   REQUEST_TIMEOUT,
 } from '../config/constants';
-import type { ApiResponse } from './types';
+import type { ApiResponse, ConnectionIdentity } from './types';
 
 export class HttpClient {
   constructor(
     private authManager: AuthManager,
-    private projectId?: string
+    private projectId?: string,
+    private connectionIdentity?: ConnectionIdentity
   ) {}
 
   async post<T>(path: string, body: Record<string, unknown>): Promise<T> {
     const url = `${API_ENDPOINT}${path}`;
     const requestBody = {
       project_id: this.projectId,
+      // Connection identification for seat-based billing (v5.0.0+)
+      ...(this.connectionIdentity && {
+        connection_hash: this.connectionIdentity.connectionHash,
+        connection_display: {
+          environment: this.connectionIdentity.environment,
+          path_suffix: this.connectionIdentity.pathSuffix,
+        },
+      }),
       ...body,
     };
 

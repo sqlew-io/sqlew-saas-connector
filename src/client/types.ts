@@ -1,7 +1,38 @@
+/**
+ * Detected environment types for connection identification
+ * @since v5.0.0
+ */
+export type Environment =
+  | 'windows'
+  | 'macos'
+  | 'linux'
+  | 'wsl'
+  | 'docker'
+  | 'unknown';
+
+/**
+ * Connection identity for SaaS backend.
+ * Provides unique identification for each connection.
+ *
+ * @since v5.0.0
+ */
+export interface ConnectionIdentity {
+  /** SHA256 hash for internal identification (Base64URL, 43 chars) */
+  connectionHash: string;
+  /** Detected environment for display (windows, macos, linux, wsl, docker) */
+  environment: Environment;
+  /** Last two path segments for display (e.g., 'RustroverProjects/my-app') */
+  pathSuffix: string;
+  /** Full path (stored locally, not sent to server) */
+  fullPath: string;
+}
+
 // Configuration passed from mcp-sqlew
 export interface CloudConfig {
   apiKey: string;
   projectId?: string;
+  /** Connection identity for SaaS mode (v5.0.0+) */
+  connectionIdentity?: ConnectionIdentity;
 }
 
 // Health check result

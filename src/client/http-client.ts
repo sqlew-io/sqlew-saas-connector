@@ -7,11 +7,12 @@ import {
   MAX_RETRY_DELAY,
   REQUEST_TIMEOUT,
 } from '../config/constants';
-import type { ApiResponse, ConnectionIdentity } from './types';
+import type { ApiResponse, ConnectionIdentity, ProjectResolveResponse } from './types';
 
 export class HttpClient {
   constructor(
     private authManager: AuthManager,
+    private projectName?: string,
     private projectId?: string,
     private connectionIdentity?: ConnectionIdentity
   ) {}
@@ -20,6 +21,7 @@ export class HttpClient {
     const url = `${API_ENDPOINT}${path}`;
     const requestBody = {
       project_id: this.projectId,
+      project_name: this.projectName,
       // Connection identification for seat-based billing (v5.0.0+)
       ...(this.connectionIdentity && {
         connection_hash: this.connectionIdentity.connectionHash,
@@ -180,5 +182,73 @@ export class HttpClient {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+/**
+ * Resolve project name to UUID via /api/v1/project/resolve
+ *
+ * This is a standalone function used before HttpClient is fully initialized,
+ * since we need the projectId to construct HttpClient.
+ *
+ * @param apiKey - API key for authentication
+ * @param projectName - Project name from config.toml
+ * @returns Resolved project UUID
+ * @throws ApiError on authentication or resolution failure
+ */
+export async function resolveProject(
+  apiKey: string,
+  projectName: string
+): Promise<string> {
+  const url = `${API_ENDPOINT}/api/v1/project/resolve`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project_name: projectName }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const body = (await response.json()) as ApiResponse<unknown>;
+        errorMessage = body.error?.message || errorMessage;
+      } catch {
+        // Ignore JSON parse error
+      }
+      throw new ApiError('PROJECT_RESOLVE_FAILED', errorMessage, response.status);
+    }
+
+    const body = (await response.json()) as ApiResponse<ProjectResolveResponse>;
+    if (!body.success || !body.data?.project_id) {
+      throw new ApiError(
+        'PROJECT_RESOLVE_FAILED',
+        body.error?.message || 'Failed to resolve project',
+        500
+      );
+    }
+
+    return body.data.project_id;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ApiError('TIMEOUT', 'Project resolve request timed out', 408);
+    }
+    throw new ApiError(
+      'NETWORK_ERROR',
+      `Failed to resolve project: ${error instanceof Error ? error.message : String(error)}`,
+      0
+    );
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

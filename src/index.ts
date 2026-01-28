@@ -1,5 +1,9 @@
 import { SaaSBackend } from './backend/saas-backend';
+import { resolveProject } from './client/http-client';
 import type { CloudConfig, PluginModule, ToolBackend } from './client/types';
+
+// Re-export resolveProject for use by mcp-sqlew
+export { resolveProject };
 
 /**
  * Create a SaaS backend instance
@@ -29,10 +33,13 @@ export type {
 export { ApiError } from './errors/api-error';
 
 // CommonJS compatibility
-const pluginModule: PluginModule = {
+// Note: Named exports (resolveProject, ApiError) are available via ESM import
+// The default export provides the plugin interface for mcp-sqlew
+const pluginModule: PluginModule & { resolveProject: typeof resolveProject } = {
   createBackend,
   version,
   minVersion,
+  resolveProject,
 };
 
 module.exports = pluginModule;

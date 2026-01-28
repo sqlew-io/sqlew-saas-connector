@@ -16,7 +16,11 @@ export class SaaSBackend implements ToolBackend {
 
   constructor(config: CloudConfig) {
     const authManager = new AuthManager(config.apiKey);
-    this.httpClient = new HttpClient(authManager, config.projectId);
+    this.httpClient = new HttpClient(
+      authManager,
+      config.projectId,
+      config.connectionIdentity
+    );
   }
 
   async execute<T>(

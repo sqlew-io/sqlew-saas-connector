@@ -18,6 +18,7 @@ export class SaaSBackend implements ToolBackend {
     const authManager = new AuthManager(config.apiKey);
     this.httpClient = new HttpClient(
       authManager,
+      config.projectName,
       config.projectId,
       config.connectionIdentity
     );

@@ -30,9 +30,17 @@ export interface ConnectionIdentity {
 // Configuration passed from mcp-sqlew
 export interface CloudConfig {
   apiKey: string;
+  /** Project name from .sqlew/config.toml [project].name */
+  projectName?: string;
+  /** Resolved project UUID (cached in ~/.sqlew.env) */
   projectId?: string;
   /** Connection identity for SaaS mode (v5.0.0+) */
   connectionIdentity?: ConnectionIdentity;
+}
+
+// Project resolve response
+export interface ProjectResolveResponse {
+  project_id: string;
 }
 
 // Health check result

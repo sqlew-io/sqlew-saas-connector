@@ -4,3 +4,4 @@ dist/
 .env
 *.tgz
 .staging/
+.idea/

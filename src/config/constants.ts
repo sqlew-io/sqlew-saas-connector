@@ -1,9 +1,6 @@
 // API endpoint is determined at build time for security
 // OSS side cannot modify this value
-export const API_ENDPOINT =
-  process.env.BUILD_ENV === 'development'
-    ? 'http://localhost:8080'
-    : 'https://api.sqlew.io';
+export const API_ENDPOINT = 'https://api.sqlew.io';
 
 // Retry configuration
 export const MAX_RETRIES = 3;

@@ -36,6 +36,8 @@ export interface CloudConfig {
   projectId?: string;
   /** Connection identity for SaaS mode (v5.0.0+) */
   connectionIdentity?: ConnectionIdentity;
+  /** MCP client name for audit (e.g., "claude-code", "cursor") */
+  agentName?: string;
 }
 
 // Project resolve response

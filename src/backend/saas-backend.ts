@@ -47,9 +47,34 @@ export class SaaSBackend implements ToolBackend {
       );
     }
 
+    // Normalize params for SaaS API compatibility
+    const normalizedParams = this.normalizeParams(tool, action, params);
+
     // Call SaaS API
     const endpoint = `/api/v1/${tool}/${action}`;
-    return await this.httpClient.post<T>(endpoint, params);
+    return await this.httpClient.post<T>(endpoint, normalizedParams);
+  }
+
+  /**
+   * Normalize params for SaaS API compatibility
+   * Maps client param names to SaaS API expected names
+   */
+  private normalizeParams(
+    tool: string,
+    action: string,
+    params: Record<string, unknown>
+  ): Record<string, unknown> {
+    const result = { ...params };
+
+    // constraint.deactivate/activate: constraint_id → id
+    if (tool === 'constraint' && (action === 'deactivate' || action === 'activate')) {
+      if ('constraint_id' in result && !('id' in result)) {
+        result.id = result.constraint_id;
+        delete result.constraint_id;
+      }
+    }
+
+    return result;
   }
 
   async healthCheck(): Promise<HealthCheckResult> {
@@ -71,5 +96,12 @@ export class SaaSBackend implements ToolBackend {
 
   async disconnect(): Promise<void> {
     // HTTP client doesn't need explicit disconnect
+  }
+
+  /**
+   * Set agent name for X-Agent header (called after MCP handshake)
+   */
+  setAgentName(name: string): void {
+    this.httpClient.setAgentName(name);
   }
 }

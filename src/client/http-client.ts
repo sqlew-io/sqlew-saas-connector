@@ -10,12 +10,21 @@ import {
 import type { ApiResponse, ConnectionIdentity, ProjectResolveResponse } from './types';
 
 export class HttpClient {
+  private agentName?: string;
+
   constructor(
     private authManager: AuthManager,
     private projectName?: string,
     private projectId?: string,
     private connectionIdentity?: ConnectionIdentity
   ) {}
+
+  /**
+   * Set agent name for X-Agent header (called after MCP handshake)
+   */
+  setAgentName(name: string): void {
+    this.agentName = name;
+  }
 
   async post<T>(path: string, body: Record<string, unknown>): Promise<T> {
     const url = `${API_ENDPOINT}${path}`;
@@ -43,6 +52,7 @@ export class HttpClient {
           headers: {
             Authorization: this.authManager.getAuthorizationHeader(),
             'Content-Type': 'application/json',
+            ...(this.agentName && { 'X-Agent': this.agentName }),
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal,
@@ -67,6 +77,7 @@ export class HttpClient {
           method: 'GET',
           headers: {
             Authorization: this.authManager.getAuthorizationHeader(),
+            ...(this.agentName && { 'X-Agent': this.agentName }),
           },
           signal: controller.signal,
         });
